@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,9 +14,9 @@
                 <h3 class="py-3 rounded-pill px-5 border-2 text-primary border border-primary">PHP CRUD</h3>
             </div>
             <div class="col-md-5 p-5">
-                <form action="" style="padding: 80px;" class="container-fluid rounded-5 bg-secondary-subtle">
+                <form action="index.php" method="post" style="padding: 80px;" class="container-fluid rounded-5 bg-secondary-subtle">
                     <div class="mb-3">
-                        <h4 class="text-center">Log In Form</h4>
+                        <h4 class="text-center">Register Form</h4>
                         <p class="text-center text-secondary">Please fill out all fields.</p>
                     </div>
                     <div class="mb-3">
@@ -36,8 +37,14 @@
                         <input type="password" name="cpass" class="form-control" id="exampleInputPassword2">
                     </div>
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                        <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                        <?php 
+                        if (isset($_SESSION["insert"])) {
+                            ?>
+                           <p class="text-success"> <?= $_SESSION['insert'] ?></p>
+                            <?php
+                        }
+                        unset($_SESSION['insert']);
+                        ?>
                     </div>
                     <button type="submit" name="btnSub" class="btn btn-primary">Submit</button>
                 </form>
@@ -54,11 +61,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>000</td>
-                            <td>Ko Ka</td>
-                            <td>koka123@gmail.com</td>
-                            <td>12345</td>
+                        <?php 
+                            include'./db.php';
+                            $query = 'SELECT * FROM tbl_user';
+                            $result = mysqli_query($conn, $query);
+                            foreach ($result as $row) {
+                                ?> 
+                                    <tr>
+                            <td><?= $row['id'] ?></td>
+                            <td><?= $row['userName'] ?></td>
+                            <td><?= $row['email'] ?></td>
+                            <td><?= $row['pass'] ?></td>
                             <td>
                                 <div class="d-flex gap-3 w-100 justify-content-center">
                                     <a class="btn d-flex align-items-center justify-content-center gap-1 btn-warning" href="#"> 
@@ -76,6 +89,10 @@
                                 </div>
                             </td>
                         </tr>
+                                <?php
+                            }
+                        ?>
+                        
                     </tbody>
                 </table>
             </div>
@@ -83,3 +100,25 @@
     </main>
 </body>
 </html>
+<?php 
+if(isset($_POST['btnSub'])){
+    include('./db.php');
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $pass = $_POST['pass'];
+    $cpass = $_POST['cpass'];
+
+    if($pass != $cpass){
+        $_SESSION['insert']='The password and confirm password not match.';
+    }else{
+        $query = "INSERT INTO tbl_user(userName,email,pass) VALUES ('$name','$email','$pass')";
+        $result = mysqli_query($conn, $query);
+        if($result){
+            $_SESSION['insert']='User information inserted success...' ;
+            
+        }
+    }
+
+}
+
+?>
